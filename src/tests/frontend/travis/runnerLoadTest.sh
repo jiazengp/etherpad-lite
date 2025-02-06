@@ -15,6 +15,8 @@ try() { "$@" || fatal "'$@' failed"; }
 MY_DIR=$(try cd "${0%/*}" && try pwd -P) || exit 1
 try cd "${MY_DIR}/../../../.."
 
+sed -e '/^ *"importExportRateLimiting":/,/^ *\}/ s/"max":.*/"max": 100000000/' -i settings.json.template
+
 try sed -e '
 s!"loadTest":[^,]*!"loadTest": true!
 # Reduce rate limit aggressiveness
@@ -22,8 +24,8 @@ s!"points":[^,]*!"points": 1000!
 ' settings.json.template >settings.json
 
 log "Assuming src/bin/installDeps.sh has already been run"
-node src/node/server.js &
-ep_pid=$!
+(cd src && pnpm run prod &
+ep_pid=$!)
 
 log "Waiting for Etherpad to accept connections (http://localhost:9001)..."
 connected=false
