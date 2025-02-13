@@ -42,13 +42,26 @@
       "name": "specialpages",
       "hooks": {
         "expressCreateServer": "ep_etherpad-lite/node/hooks/express/specialpages",
-        "expressPreSession": "ep_etherpad-lite/node/hooks/express/specialpages"
+        "expressPreSession": "ep_etherpad-lite/node/hooks/express/specialpages",
+        "socketio": "ep_etherpad-lite/node/hooks/express/specialpages"
       }
+    },
+    {
+      "name": "oauth2",
+        "hooks": {
+            "expressCreateServer": "ep_etherpad-lite/node/security/OAuth2Provider"
+        }
     },
     {
       "name": "padurlsanitize",
       "hooks": {
         "expressCreateServer": "ep_etherpad-lite/node/hooks/express/padurlsanitize"
+      }
+    },
+    {
+      "name": "pwa",
+      "hooks": {
+        "expressCreateServer": "ep_etherpad-lite/node/hooks/express/pwa"
       }
     },
     {
@@ -67,6 +80,12 @@
       "name": "errorhandling",
       "hooks": {
         "expressCreateServer": "ep_etherpad-lite/node/hooks/express/errorhandling"
+      }
+    },
+    {
+      "name": "restApi",
+      "hooks": {
+        "expressCreateServer": "ep_etherpad-lite/node/handler/RestAPI"
       }
     },
     {
@@ -92,14 +111,12 @@
     {
       "name": "adminplugins",
       "hooks": {
-        "expressCreateServer": "ep_etherpad-lite/node/hooks/express/adminplugins",
         "socketio": "ep_etherpad-lite/node/hooks/express/adminplugins"
       }
     },
     {
       "name": "adminsettings",
       "hooks": {
-        "expressCreateServer": "ep_etherpad-lite/node/hooks/express/adminsettings",
         "socketio": "ep_etherpad-lite/node/hooks/express/adminsettings"
       }
     },

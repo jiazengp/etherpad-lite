@@ -172,6 +172,21 @@
   "showSettingsInAdminPage": "${SHOW_SETTINGS_IN_ADMIN_PAGE:true}",
 
   /*
+   * Settings for cleanup of pads
+   */
+  "cleanup": {
+    "enabled": false,
+    "keepRevisions": 5
+  },
+
+  /*
+    The authentication method used by the server.
+    The default value is sso
+    If you want to use the old authentication system, change this to apikey
+   */
+  "authenticationMethod": "${AUTHENTICATION_METHOD:sso}",
+
+  /*
    * Node native SSL support
    *
    * This is disabled by default.
@@ -186,6 +201,15 @@
             "ca": ["/path-to-your/epl-intermediate-cert1.crt", "/path-to-your/epl-intermediate-cert2.crt"]
           },
   */
+
+
+  /*
+   * Enables the use of a different server. We have a different one that syncs changes from the original server.
+   * It is hosted on GitHub and should not be blocked by many firewalls.
+   *  https://etherpad.org/ep_infos
+   */
+
+  "updateServer": "https://etherpad.org/ep_infos",
 
   /*
    * The type of the database.
@@ -207,15 +231,15 @@
 
   "dbType": "${DB_TYPE:dirty}",
   "dbSettings": {
-    "host":     "${DB_HOST:undefined}",
-    "port":     "${DB_PORT:undefined}",
-    "database": "${DB_NAME:undefined}",
-    "user":     "${DB_USER:undefined}",
-    "password": "${DB_PASS:undefined}",
-    "charset":  "${DB_CHARSET:undefined}",
-    "filename": "${DB_FILENAME:var/dirty.db}",
+    "host":       "${DB_HOST:undefined}",
+    "port":       "${DB_PORT:undefined}",
+    "database":   "${DB_NAME:undefined}",
+    "user":       "${DB_USER:undefined}",
+    "password":   "${DB_PASS:undefined}",
+    "charset":    "${DB_CHARSET:undefined}",
+    "filename":   "${DB_FILENAME:var/dirty.db}",
     "collection": "${DB_COLLECTION:undefined}",
-    "url":      "${DB_URL:undefined}"
+    "url":        "${DB_URL:undefined}"
   },
 
   /*
@@ -323,14 +347,6 @@
   "soffice": "${SOFFICE:null}",
 
   /*
-   * Path to the Tidy executable.
-   *
-   * Tidy is used to improve the quality of exported pads.
-   * Setting it to null disables Tidy.
-   */
-  "tidyHtml": "${TIDY_HTML:null}",
-
-  /*
    * Allow import of file types other than the supported ones:
    * txt, doc, docx, rtf, odt, html & htm
    */
@@ -364,6 +380,23 @@
    */
   "cookie": {
     /*
+     * How often (in milliseconds) the key used to sign the express_sid cookie
+     * should be rotated. Long rotation intervals reduce signature verification
+     * overhead (because there are fewer historical keys to check) and database
+     * load (fewer historical keys to store, and less frequent queries to
+     * get/update the keys). Short rotation intervals are slightly more secure.
+     *
+     * Multiple Etherpad processes sharing the same database (table) is
+     * supported as long as the clock sync error is significantly less than this
+     * value.
+     *
+     * Key rotation can be disabled (not recommended) by setting this to 0 or
+     * null, or by disabling session expiration (see sessionLifetime).
+     */
+    // 86400000 = 1d * 24h/d * 60m/h * 60s/m * 1000ms/s
+    "keyRotationInterval": "${COOKIE_KEY_ROTATION_INTERVAL:86400000}",
+
+    /*
      * Value of the SameSite cookie property. "Lax" is recommended unless
      * Etherpad will be embedded in an iframe from another site, in which case
      * this must be set to "None". Note: "None" will not work (the browser will
@@ -392,6 +425,8 @@
      *     indefinitely without consulting authentication or authorization
      *     hooks, so once a user has accessed a pad, the user can continue to
      *     use the pad until the user leaves for longer than sessionLifetime.
+     *   - More historical keys (sessionLifetime / keyRotationInterval) must be
+     *     checked when verifying signatures.
      *
      * Session lifetime can be set to infinity (not recommended) by setting this
      * to null or 0. Note that if the session does not expire, most browsers
@@ -516,7 +551,7 @@
   /*
    * Restrict socket.io transport methods
    */
-  "socketTransportProtocols" : ["xhr-polling", "jsonp-polling", "htmlfile"],
+  "socketTransportProtocols" : ["websocket", "polling"],
 
   "socketIo": {
     /*
@@ -526,7 +561,7 @@
      * value to work properly, but increasing the value increases susceptibility
      * to denial of service attacks (malicious clients can exhaust memory).
      */
-    "maxHttpBufferSize": "${SOCKETIO_MAX_HTTP_BUFFER_SIZE:10000}"
+    "maxHttpBufferSize": "${SOCKETIO_MAX_HTTP_BUFFER_SIZE:50000}"
   },
 
   /*
@@ -634,5 +669,40 @@
   "customLocaleStrings": {},
 
   /* Disable Admin UI tests */
-  "enableAdminUITests": false
+  "enableAdminUITests": false,
+
+  /*
+   * Enable/Disable case-insensitive pad names.
+   */
+  "lowerCasePadIds": "${LOWER_CASE_PAD_IDS:false}",
+  "sso": {
+    "issuer": "${SSO_ISSUER:http://localhost:9001}",
+      "clients": [
+        {
+          "client_id": "${ADMIN_CLIENT:admin_client}",
+          "client_secret": "${ADMIN_SECRET:admin}",
+          "grant_types": ["authorization_code"],
+          "response_types": ["code"],
+          "redirect_uris": ["${ADMIN_REDIRECT:http://localhost:9001/admin/}"]
+        },
+        {
+          "client_id": "${USER_CLIENT:user_client}",
+          "client_secret": "${USER_SECRET:user}",
+          "grant_types": ["authorization_code"],
+          "response_types": ["code"],
+          "redirect_uris": ["${USER_REDIRECT:http://localhost:9001/}"]
+        }
+      ]
+    },
+
+  /* Set the time to live for the tokens
+     This is the time of seconds a user is logged into Etherpad
+  "ttl": {
+      "AccessToken": 3600,
+      "AuthorizationCode": 600,
+      "ClientCredentials": 3600,
+      "IdToken": 3600,
+      "RefreshToken": 86400
+  }
+  */
 }
